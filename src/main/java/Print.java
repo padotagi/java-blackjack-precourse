@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 public class Print {
 
     public static final String INPUT_NAME = "게임에 참여할 사람의 이름을 입력하세요.(쉼표 기준으로 분리)";
+    public static final String DELIMITER = ",";
     public static final String INPUT_NAME_ERROR = "[ERROR] 공백/여백은 이름으로 사용할 수 없습니다.";
     public static final String INPUT_MONEY = "의 배팅 금액은?";
     public static final String INPUT_MONEY_ERROR = "[ERROR] 1000의 배수로 금액을 입력하세요.";
@@ -26,26 +27,26 @@ public class Print {
     public static void printOneRoundInfo(Dealer dealer, List<Player> playerList) {
         System.out.println("\n" + TO_DEALER + playerList.stream()
                 .map(Player::getName)
-                .collect(Collectors.joining(","))
+                .collect(Collectors.joining(DELIMITER))
                 + TWO_CARDS_TO_EACH);
         System.out.println(DEALER + dealer.getCards().stream()
                 .map(Card::toStringInKorean)
-                .collect(Collectors.joining(",")));
+                .collect(Collectors.joining(DELIMITER)));
         for (Player player : playerList) {
             System.out.println(player.getName() + CARD + player.getCards().stream()
                     .map(Card::toStringInKorean)
-                    .collect(Collectors.joining(",")));
+                    .collect(Collectors.joining(DELIMITER)));
         }
     }
 
     public static void printSingleInfo(Player player) {
         System.out.println(player.getName() + CARD + player.getCards().stream()
                 .map(Card::toStringInKorean)
-                .collect(Collectors.joining(",")));
+                .collect(Collectors.joining(DELIMITER)));
     }
     public static void printUltimateProfitInfo(Dealer dealer, List<Player> playerList) {
         System.out.println("\n" + Print.ULTIMATE_PROFIT);
-        System.out.println(Print.DEALER + dealer.getPrize());
+        System.out.println(Print.DEALER + (int)dealer.getPrize());
         for (Player player : playerList) {
             System.out.println(player.getName() + ": " + (int)player.getPrize());
         }

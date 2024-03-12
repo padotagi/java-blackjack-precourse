@@ -18,7 +18,7 @@ public class Application {
         application.dealer = new Dealer();
         application.playerList = new ArrayList<>();
 
-        String[] playerNames = application.input.inputName().split(",");
+        String[] playerNames = application.input.inputName().split(Print.DELIMITER);
         for (String playerName : playerNames) {
             double bettingMoney = application.input.inputMoney(playerName);
             application.playerList.add(new Player(playerName, bettingMoney));

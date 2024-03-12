@@ -42,7 +42,7 @@ public class Input {
     }
 
     public void validateName(String line) {
-        String[] names = line.split(",");
+        String[] names = line.split(Print.DELIMITER);
 
         boolean hasInvalid = Arrays.stream(names)
                 .anyMatch(name -> name == null || name.trim().isEmpty());
