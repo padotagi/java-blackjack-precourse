@@ -1,5 +1,6 @@
 package domain.user;
 
+import domain.Score;
 import domain.card.Card;
 
 import java.util.ArrayList;
@@ -10,12 +11,30 @@ import java.util.List;
  */
 public class Dealer {
     private final List<Card> cards = new ArrayList<>();
+    private final Score score = new Score();
+    private double prize;
 
     public Dealer() {}
 
     public void addCard(Card card) {
         cards.add(card);
+        score.addScore(card.getSymbol());
     }
 
-    // TODO 추가 기능 구현
+    public void setPrize(double prize) {
+        this.prize = prize;
+    }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public int getScore() {
+        return score.getScore();
+    }
+
+    public double getPrize() {
+        return prize;
+    }
+
 }
