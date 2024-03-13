@@ -12,7 +12,7 @@ public class Print {
     public static final String INPUT_NAME_ERROR = "[ERROR] 공백/여백은 이름으로 사용할 수 없습니다.";
     public static final String INPUT_MONEY = "의 배팅 금액은?";
     public static final String INPUT_MONEY_ERROR = "[ERROR] 1000의 배수로 금액을 입력하세요.";
-    public  static final int NUMBER_OF_CARDS_FOR_ROUND_ONE = 2;
+    public static final int NUMBER_OF_CARDS_FOR_ROUND_ONE = 2;
     public static final String TO_DEALER = "딜러와";
     public static final String TWO_CARDS_TO_EACH = "에게 2장씩 나누었습니다.";
     public static final String DEALER = "딜러: ";
@@ -27,8 +27,7 @@ public class Print {
     public static void printOneRoundInfo(Dealer dealer, List<Player> playerList) {
         System.out.println("\n" + TO_DEALER + playerList.stream()
                 .map(Player::getName)
-                .collect(Collectors.joining(DELIMITER))
-                + TWO_CARDS_TO_EACH);
+                .collect(Collectors.joining(DELIMITER)) + TWO_CARDS_TO_EACH);
         System.out.println(DEALER + dealer.getCards().stream()
                 .map(Card::toStringInKorean)
                 .collect(Collectors.joining(DELIMITER)));
@@ -44,11 +43,12 @@ public class Print {
                 .map(Card::toStringInKorean)
                 .collect(Collectors.joining(DELIMITER)));
     }
+
     public static void printUltimateProfitInfo(Dealer dealer, List<Player> playerList) {
-        System.out.println("\n" + Print.ULTIMATE_PROFIT);
-        System.out.println(Print.DEALER + (int)dealer.getPrize());
+        System.out.println("\n" + ULTIMATE_PROFIT);
+        System.out.println(DEALER + (int) dealer.getPrize());
         for (Player player : playerList) {
-            System.out.println(player.getName() + ": " + (int)player.getPrize());
+            System.out.println(player.getName() + ": " + (int) player.getPrize());
         }
     }
 }

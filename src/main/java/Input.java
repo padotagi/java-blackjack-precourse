@@ -1,6 +1,9 @@
 import camp.nextstep.edu.missionutils.Console;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Input {
 
@@ -47,9 +50,16 @@ public class Input {
         boolean hasInvalid = Arrays.stream(names)
                 .anyMatch(name -> name == null || name.trim().isEmpty());
 
-        if (hasInvalid) {
+        if (hasInvalid || duplicateNames(names)) {
             throw new IllegalArgumentException(Print.INPUT_NAME_ERROR);
         }
+    }
+
+    public boolean duplicateNames(String[] names) {
+        List<String> duplicates = Arrays.stream(names)
+                .filter(s -> Collections.frequency(Arrays.asList(names), s) > 1)
+                .collect(Collectors.toList());
+        return duplicates.size() > 0;
     }
 
     public void validateMoney(String money) {
