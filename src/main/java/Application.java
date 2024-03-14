@@ -1,8 +1,10 @@
+import domain.card.Blackjack;
 import domain.card.Card;
 import domain.user.Dealer;
 import domain.user.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Application {
@@ -18,27 +20,20 @@ public class Application {
         application.dealer = new Dealer();
         application.playerList = new ArrayList<>();
 
-        String[] playerNames = application.input.inputName().split(Print.DELIMITER);
+        List<String> playerNames = Arrays.asList(application.input.inputName().split(Print.DELIMITER));
         for (String playerName : playerNames) {
             double bettingMoney = application.input.inputMoney(playerName);
             application.playerList.add(new Player(playerName, bettingMoney));
         }
-        application.shuffleCards(application.dealer, application.playerList);
+        application.dealer.shuffleCards(application.dealer, application.playerList);
         application.playRoundOne(application.dealer, application.playerList);
-    }
-
-    public void shuffleCards(Dealer dealer, List<Player> playerList) {
-        for (int i = 0; i < Print.NUMBER_OF_CARDS_FOR_ROUND_ONE; i++) {
-            dealer.addCard(Card.getCard());
-            playerList.forEach(player -> player.addCard(Card.getCard()));
-        }
     }
 
     public void playRoundOne(Dealer dealer, List<Player> playerList) {
         Print.printOneRoundInfo(dealer, playerList);
 
         boolean blackJack = playerList.stream()
-                .anyMatch(player -> result.isBlackJack(player.getCards()));
+                .anyMatch(player -> Blackjack.isBlackjack(player.getCards()));
         if (blackJack) {
             result.getUltimateResult(dealer, playerList);
             result.getUltimateProfitAtRoundOne(dealer, playerList);
@@ -48,24 +43,27 @@ public class Application {
     }
 
     public void playAfterRoundOne(Dealer dealer, List<Player> playerList) {
-        for (Player player : playerList) {
-            while (result.isUnderTwenty(player.getCards()) && "Y".equals(input.inputYn(player.getName()))) {
-                player.addCard(Card.getCard());
-                Print.printSingleInfo(player);
-            }
-        }
-        if (result.isUnderSixteen(dealer.getCards())) {
+        playerList.forEach(this::dealOneCard);
+
+        if (Blackjack.isUnderSixteen(dealer.getCards())) {
             System.out.println(Print.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
             dealer.addCard(Card.getCard());
         }
 
         boolean isUnderTwenty = playerList.stream()
-                .anyMatch(player -> result.isUnderTwenty(player.getCards()));
+                .anyMatch(player -> Blackjack.isUnderTwenty(player.getCards()));
         if (isUnderTwenty) {
             playAfterRoundOne(dealer, playerList);
         } else {
             result.getUltimateResult(dealer, playerList);
             result.getUltimateProfitAfterRoundOne(dealer, playerList);
+        }
+    }
+
+    public void dealOneCard(Player player) {
+        while (Blackjack.isUnderTwenty(player.getCards()) && "Y".equals(input.inputYn(player.getName()))) {
+            player.addCard(Card.getCard());
+            Print.printSingleInfo(player);
         }
     }
 }

@@ -12,7 +12,6 @@ public class Print {
     public static final String INPUT_NAME_ERROR = "[ERROR] 공백/여백은 이름으로 사용할 수 없습니다.";
     public static final String INPUT_MONEY = "의 배팅 금액은?";
     public static final String INPUT_MONEY_ERROR = "[ERROR] 1000의 배수로 금액을 입력하세요.";
-    public static final int NUMBER_OF_CARDS_FOR_ROUND_ONE = 2;
     public static final String TO_DEALER = "딜러와";
     public static final String TWO_CARDS_TO_EACH = "에게 2장씩 나누었습니다.";
     public static final String DEALER = "딜러: ";

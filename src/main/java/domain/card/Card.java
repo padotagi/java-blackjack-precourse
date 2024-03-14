@@ -11,8 +11,8 @@ import java.util.Objects;
 public class Card {
     private final Symbol symbol;
     private final Type type;
-
     private static final List<Card> cardList = CardFactory.create();
+    private static final int KING_QUEEN_JACK_POINT = 10;
 
     public Card(Symbol symbol, Type type) {
         this.symbol = symbol;
@@ -29,7 +29,13 @@ public class Card {
     }
 
     public String toStringInKorean() {
-        return symbol.getScore() + type.getKorName();
+        String cards;
+        if (symbol.getScore() == KING_QUEEN_JACK_POINT && !"TEN".equals(symbol.name())) {
+            cards = symbol.name().charAt(0) + type.getKorName();
+        } else {
+            cards = symbol.getScore() + type.getKorName();
+        }
+        return cards;
     }
 
     @Override

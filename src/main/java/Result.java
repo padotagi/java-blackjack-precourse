@@ -1,4 +1,4 @@
-import domain.Score;
+import domain.card.Blackjack;
 import domain.card.Card;
 import domain.user.Dealer;
 import domain.user.Player;
@@ -15,7 +15,7 @@ public class Result {
     public void getUltimateProfitAtRoundOne(Dealer dealer, List<Player> playerList) {
         getWinnerAndLoserList(playerList);
 
-        if (isBlackJack(dealer.getCards())) {
+        if (Blackjack.isBlackjack(dealer.getCards())) {
             if (winnerList.size() == 0) {
                 dealer.setPrize(getSumOfBettingMoney(loserList));
             }
@@ -30,15 +30,15 @@ public class Result {
         getWinnerAndLoserList(playerList);
 
         double loserBettingMoney = getSumOfBettingMoney(loserList);
-        double dividedLoserBettingMoney = loserBettingMoney / winnerList.size();
-        if (isBlackJack(dealer.getCards())) {
+        double dividedLoserBettingMoney = winnerList.size() > 0 ? loserBettingMoney / winnerList.size() : loserBettingMoney;
+        if (Blackjack.isBlackjack(dealer.getCards())) {
             if (winnerList.size() == 0) {
                 dealer.setPrize(loserBettingMoney);
             } else {
-                winnerList.forEach(winner -> winner.setPrize(dividedLoserBettingMoney));
+                copyPrize(playerList, dividedLoserBettingMoney);
             }
         } else {
-            winnerList.forEach(winner -> winner.setPrize(dividedLoserBettingMoney));
+            copyPrize(playerList, dividedLoserBettingMoney);
             dealer.setPrize(Math.negateExact((int) getSumOfBettingMoney(winnerList)));
         }
         Print.printUltimateProfitInfo(dealer, playerList);
@@ -46,7 +46,7 @@ public class Result {
 
     public void getWinnerAndLoserList(List<Player> playerList) {
         for (Player player : playerList) {
-            if (isBlackJack(player.getCards())) {
+            if (Blackjack.isBlackjack(player.getCards())) {
                 winnerList.add(player);
             } else {
                 loserList.add(player);
@@ -66,44 +66,20 @@ public class Result {
         for (Player player : playerList) {
             System.out.println(player.getName() + Print.CARD + player.getCards().stream()
                     .map(Card::toStringInKorean)
-                    .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + getSumOfScore(player.getCards()));
+                    .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + Blackjack.getSumOfScore(player.getCards()));
         }
     }
 
-    public boolean isBlackJack(List<Card> cards) {
-        return Score.BLACKJACK_POINT == getSumOfScore(cards);
-    }
-
-    public boolean isUnderTwenty(List<Card> cards) {
-        return Score.BLACKJACK_POINT > getSumOfScore(cards);
-    }
-
-    public boolean isUnderSixteen(List<Card> cards) {
-        return Score.MINIMUM_POINT_FOR_DEALER >= getSumOfScore(cards);
-    }
-
-    public int getSumOfScore(List<Card> cards) {
-        int totalScore = 0;
-        for (Card card : cards) {
-            if ("ACE".equals(card.getSymbol().name())) {
-                totalScore = checkAce(totalScore);
-            } else {
-                totalScore += card.getSymbol().getScore();
-            }
+    public void copyPrize(List<Player> playerList, double prize) {
+        for (Player winner : winnerList) {
+            playerList.stream()
+                    .filter(player -> player.getName().equals(winner.getName()))
+                    .forEach(player -> player.setPrize(prize));
         }
-        return totalScore;
-    }
-
-    public int checkAce(int totalScore) {
-        if (totalScore + Score.ACE_POINT_ONE == Score.BLACKJACK_POINT) {
-            totalScore += Score.ACE_POINT_ONE;
-        } else if (totalScore + Score.ACE_POINT_ELEVEN == Score.BLACKJACK_POINT) {
-            totalScore += Score.ACE_POINT_ELEVEN;
-        } else if (totalScore + Score.ACE_POINT_ONE > totalScore + Score.ACE_POINT_ELEVEN) {
-            totalScore += Score.ACE_POINT_ELEVEN;
-        } else {
-            totalScore += Score.ACE_POINT_ONE;
+        for (Player loser : loserList) {
+            playerList.stream()
+                    .filter(player -> player.getName().equals(loser.getName()))
+                    .forEach(player -> player.setPrize(Math.negateExact((int) prize)));
         }
-        return totalScore;
     }
 }
