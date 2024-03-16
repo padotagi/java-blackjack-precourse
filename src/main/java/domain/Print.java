@@ -1,4 +1,7 @@
+package domain;
+
 import domain.card.Card;
+import domain.card.Deck;
 import domain.user.Dealer;
 import domain.user.Player;
 
@@ -41,6 +44,17 @@ public class Print {
         System.out.println(player.getName() + CARD + player.getCards().stream()
                 .map(Card::toStringInKorean)
                 .collect(Collectors.joining(DELIMITER)));
+    }
+
+    public static void printUltimateResult(Dealer dealer, List<Player> playerList) {
+        System.out.println("\n" + Print.DEALER + dealer.getCards().stream()
+                .map(Card::toStringInKorean)
+                .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + dealer.getScore());
+        for (Player player : playerList) {
+            System.out.println(player.getName() + Print.CARD + player.getCards().stream()
+                    .map(Card::toStringInKorean)
+                    .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + new Deck(player.getCards()).getSumOfScore());
+        }
     }
 
     public static void printUltimateProfitInfo(Dealer dealer, List<Player> playerList) {

@@ -1,21 +1,22 @@
+package domain;
+
 import domain.card.Blackjack;
-import domain.card.Card;
+import domain.card.Deck;
 import domain.user.Dealer;
 import domain.user.Player;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Result {
 
     List<Player> winnerList = new ArrayList<>();
     List<Player> loserList = new ArrayList<>();
 
-    public void getUltimateProfitAtRoundOne(Dealer dealer, List<Player> playerList) {
+    public void setUltimateProfitAtRoundOne(Dealer dealer, List<Player> playerList) {
         getWinnerAndLoserList(playerList);
 
-        if (Blackjack.isBlackjack(dealer.getCards())) {
+        if (Blackjack.isBlackjack(new Deck(dealer.getCards()))) {
             if (winnerList.size() == 0) {
                 dealer.setPrize(getSumOfBettingMoney(loserList));
             }
@@ -26,12 +27,12 @@ public class Result {
         Print.printUltimateProfitInfo(dealer, playerList);
     }
 
-    public void getUltimateProfitAfterRoundOne(Dealer dealer, List<Player> playerList) {
+    public void setUltimateProfitAfterRoundOne(Dealer dealer, List<Player> playerList) {
         getWinnerAndLoserList(playerList);
 
         double loserBettingMoney = getSumOfBettingMoney(loserList);
         double dividedLoserBettingMoney = winnerList.size() > 0 ? loserBettingMoney / winnerList.size() : loserBettingMoney;
-        if (Blackjack.isBlackjack(dealer.getCards())) {
+        if (Blackjack.isBlackjack(new Deck(dealer.getCards()))) {
             if (winnerList.size() == 0) {
                 dealer.setPrize(loserBettingMoney);
             } else {
@@ -46,7 +47,7 @@ public class Result {
 
     public void getWinnerAndLoserList(List<Player> playerList) {
         for (Player player : playerList) {
-            if (Blackjack.isBlackjack(player.getCards())) {
+            if (Blackjack.isBlackjack(new Deck(player.getCards()))) {
                 winnerList.add(player);
             } else {
                 loserList.add(player);
@@ -57,17 +58,6 @@ public class Result {
     public double getSumOfBettingMoney(List<Player> playerList) {
         return playerList.stream()
                 .mapToDouble(Player::getBettingMoney).sum();
-    }
-
-    public void getUltimateResult(Dealer dealer, List<Player> playerList) {
-        System.out.println("\n" + Print.DEALER + dealer.getCards().stream()
-                .map(Card::toStringInKorean)
-                .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + dealer.getScore());
-        for (Player player : playerList) {
-            System.out.println(player.getName() + Print.CARD + player.getCards().stream()
-                    .map(Card::toStringInKorean)
-                    .collect(Collectors.joining(Print.DELIMITER)) + Print.SCORE_RESULT + Blackjack.getSumOfScore(player.getCards()));
-        }
     }
 
     public void copyPrize(List<Player> playerList, double prize) {

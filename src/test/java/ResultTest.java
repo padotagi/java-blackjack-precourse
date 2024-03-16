@@ -1,7 +1,4 @@
-import domain.card.Blackjack;
-import domain.card.Card;
-import domain.card.Symbol;
-import domain.card.Type;
+import domain.card.*;
 import domain.user.Dealer;
 import domain.user.Player;
 import org.junit.jupiter.api.Assertions;
@@ -29,7 +26,7 @@ class ResultTest {
         }
 
         //when
-        boolean isBlackjack = Blackjack.isBlackjack(dealer.getCards());
+        boolean isBlackjack = Blackjack.isBlackjack(new Deck(dealer.getCards()));
 
         //then
         assertTrue(isBlackjack);
@@ -60,7 +57,7 @@ class ResultTest {
         List<Player> winnerList = new ArrayList<>();
         List<Player> loserList = new ArrayList<>();
         for (Player player : playerList) {
-            if (Blackjack.isBlackjack(player.getCards())) {
+            if (Blackjack.isBlackjack(new Deck(player.getCards()))) {
                 winnerList.add(player);
             } else {
                 loserList.add(player);
@@ -70,7 +67,7 @@ class ResultTest {
         double winnerBettingMoney = winnerList.stream().mapToDouble(Player::getBettingMoney).sum();
         double loserBettingMoney = loserList.stream().mapToDouble(Player::getBettingMoney).sum();
         double dividedLoserBettingMoney = loserBettingMoney / winnerList.size();
-        if (Blackjack.isBlackjack(dealer.getCards())) {
+        if (Blackjack.isBlackjack(new Deck(dealer.getCards()))) {
             if (winnerList.size() == 0) {
                 dealer.setPrize(loserBettingMoney);
             } else {

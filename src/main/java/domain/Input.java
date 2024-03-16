@@ -1,3 +1,5 @@
+package domain;
+
 import camp.nextstep.edu.missionutils.Console;
 
 import java.util.Arrays;
@@ -45,9 +47,9 @@ public class Input {
     }
 
     public void validateName(String line) {
-        String[] names = line.split(Print.DELIMITER);
+        List<String> names = Arrays.asList(line.split(Print.DELIMITER));
 
-        boolean hasInvalid = Arrays.stream(names)
+        boolean hasInvalid = names.stream()
                 .anyMatch(name -> name == null || name.trim().isEmpty());
 
         if (hasInvalid || duplicateNames(names)) {
@@ -55,9 +57,9 @@ public class Input {
         }
     }
 
-    public boolean duplicateNames(String[] names) {
-        List<String> duplicates = Arrays.stream(names)
-                .filter(s -> Collections.frequency(Arrays.asList(names), s) > 1)
+    public boolean duplicateNames(List<String> names) {
+        List<String> duplicates = names.stream()
+                .filter(s -> Collections.frequency(names, s) > 1)
                 .collect(Collectors.toList());
         return duplicates.size() > 0;
     }

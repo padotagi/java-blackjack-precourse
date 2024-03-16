@@ -2,6 +2,7 @@ package domain.user;
 
 import domain.Score;
 import domain.card.Card;
+import domain.card.Deck;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +41,6 @@ public class Player {
 
     public List<Card> getCards() {
         return cards;
-    }
-
-    public int getScore() {
-        return score.getScore();
     }
 
     public double getPrize() {
