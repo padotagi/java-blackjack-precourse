@@ -2,74 +2,86 @@ package domain;
 
 import domain.card.Blackjack;
 import domain.card.Deck;
-import domain.user.Dealer;
-import domain.user.Player;
+import domain.user.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Result {
 
-    List<Player> winnerList = new ArrayList<>();
-    List<Player> loserList = new ArrayList<>();
+    List<Winner> winners = new ArrayList<>();
+    List<Loser> losers = new ArrayList<>();
 
-    public void setUltimateProfitAtRoundOne(Dealer dealer, List<Player> playerList) {
-        getWinnerAndLoserList(playerList);
-
-        if (Blackjack.isBlackjack(new Deck(dealer.getCards()))) {
-            if (winnerList.size() == 0) {
-                dealer.setPrize(getSumOfBettingMoney(loserList));
+    public void setUltimateProfitAtRoundOne(List<User> users) {
+        getWinnerAndLosers(users);
+        if (Blackjack.isBlackjack(new Deck(users.get(0).getCards()))) {
+            if (winners.size() == 0) {
+                users.get(0).setPrize(getSumOfBettingMoney(losers.stream()
+                        .map(loser -> (Player) loser)
+                        .collect(Collectors.toList())));
             }
         } else {
-            winnerList.forEach(winner -> winner.setPrize(winner.getBettingMoney() * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND));
-            dealer.setPrize(Math.negateExact((int) (getSumOfBettingMoney(winnerList) * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND)));
+            winners.forEach(winner -> winner.setPrize(winner.getBettingMoney() * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND));
+            users.get(0).setPrize(Math.negateExact((int) (getSumOfBettingMoney(winners.stream()
+                    .map(winner -> (Player) winner)
+                    .collect(Collectors.toList())
+            ) * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND)));
         }
-        Print.printUltimateProfitInfo(dealer, playerList);
+        Print.printUltimateProfitInfo(users);
     }
 
-    public void setUltimateProfitAfterRoundOne(Dealer dealer, List<Player> playerList) {
-        getWinnerAndLoserList(playerList);
-
-        double loserBettingMoney = getSumOfBettingMoney(loserList);
-        double dividedLoserBettingMoney = winnerList.size() > 0 ? loserBettingMoney / winnerList.size() : loserBettingMoney;
-        if (Blackjack.isBlackjack(new Deck(dealer.getCards()))) {
-            if (winnerList.size() == 0) {
-                dealer.setPrize(loserBettingMoney);
+    public void setUltimateProfitAfterRoundOne(List<User> users) {
+        getWinnerAndLosers(users);
+        double loserBettingMoney = getSumOfBettingMoney(losers.stream()
+                .map(loser -> (Player) loser)
+                .collect(Collectors.toList()));
+        double dividedLoserBettingMoney = winners.size() > 0 ? loserBettingMoney / winners.size() : loserBettingMoney;
+        if (Blackjack.isBlackjack(new Deck(users.get(0).getCards()))) {
+            if (winners.size() == 0) {
+                users.get(0).setPrize(loserBettingMoney);
             } else {
-                copyPrize(playerList, dividedLoserBettingMoney);
+                copyPrize(users, dividedLoserBettingMoney);
             }
         } else {
-            copyPrize(playerList, dividedLoserBettingMoney);
-            dealer.setPrize(Math.negateExact((int) getSumOfBettingMoney(winnerList)));
+            copyPrize(users, dividedLoserBettingMoney);
+            users.get(0).setPrize(Math.negateExact((int) getSumOfBettingMoney(winners.stream()
+                    .map(winner -> (Player) winner)
+                    .collect(Collectors.toList()))));
         }
-        Print.printUltimateProfitInfo(dealer, playerList);
+        Print.printUltimateProfitInfo(users);
     }
 
-    public void getWinnerAndLoserList(List<Player> playerList) {
-        for (Player player : playerList) {
+    public void getWinnerAndLosers(List<User> users) {
+        List<Player> players = users.stream()
+                .filter(user -> !(user instanceof Dealer))
+                .map(user -> (Player) user)
+                .collect(Collectors.toList());
+
+        for (Player player : players) {
             if (Blackjack.isBlackjack(new Deck(player.getCards()))) {
-                winnerList.add(player);
+                winners.add((Winner) player);
             } else {
-                loserList.add(player);
+                losers.add((Loser) player);
             }
         }
     }
 
-    public double getSumOfBettingMoney(List<Player> playerList) {
-        return playerList.stream()
+    public double getSumOfBettingMoney(List<Player> players) {
+        return players.stream()
                 .mapToDouble(Player::getBettingMoney).sum();
     }
 
-    public void copyPrize(List<Player> playerList, double prize) {
-        for (Player winner : winnerList) {
-            playerList.stream()
-                    .filter(player -> player.getName().equals(winner.getName()))
-                    .forEach(player -> player.setPrize(prize));
+    public void copyPrize(List<User> users, double prize) {
+        for (Winner winner : winners) {
+            users.stream()
+                    .filter(user -> user.getName().equals(winner.getName()))
+                    .forEach(user -> user.setPrize(prize));
         }
-        for (Player loser : loserList) {
-            playerList.stream()
-                    .filter(player -> player.getName().equals(loser.getName()))
-                    .forEach(player -> player.setPrize(Math.negateExact((int) prize)));
+        for (Loser loser : losers) {
+            users.stream()
+                    .filter(user -> user.getName().equals(loser.getName()))
+                    .forEach(user -> user.setPrize(Math.negateExact((int) prize)));
         }
     }
 }

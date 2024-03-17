@@ -5,45 +5,48 @@ import domain.Print;
 import domain.Input;
 import domain.user.Dealer;
 import domain.user.Player;
+import domain.user.User;
 
 import java.util.List;
 
 public class Round {
 
-    public void playRoundOne(Dealer dealer, List<Player> playerList) {
-        Print.printOneRoundInfo(dealer, playerList);
-        continuePlayingOrNotAtRoundOne(dealer, playerList);
+    public void playRoundOne(List<User> users) {
+        Print.printOneRoundInfo(users);
+        continuePlayingOrNotAtRoundOne(users);
     }
 
-    public void playAfterRoundOne(Dealer dealer, List<Player> playerList) {
-        playerList.forEach(this::dealOneCard);
+    public void playAfterRoundOne(List<User> users) {
+        users.stream()
+                .filter(user -> !(user instanceof Dealer))
+                .forEach(user -> dealOneCard((Player) user));
 
-        if (Blackjack.isUnderSixteen(new Deck(dealer.getCards()))) {
+        if (Blackjack.isUnderSixteen(new Deck(users.get(0).getCards()))) {
             System.out.println(Print.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
-            dealer.addCard(Card.getCard());
+            users.get(0).addCard(Card.getCard());
         }
-        continuePlayingOrNotAfterRoundOne(dealer, playerList);
+        continuePlayingOrNotAfterRoundOne(users);
     }
 
-    public void continuePlayingOrNotAtRoundOne(Dealer dealer, List<Player> playerList) {
-        boolean blackjack = playerList.stream()
-                .anyMatch(player -> Blackjack.isBlackjack(new Deck(player.getCards())));
+    public void continuePlayingOrNotAtRoundOne(List<User> users) {
+        boolean blackjack = users.stream()
+                .anyMatch(user -> Blackjack.isBlackjack(new Deck(user.getCards())));
         if (blackjack) {
-            Print.printUltimateResult(dealer, playerList);
-            new Result().setUltimateProfitAtRoundOne(dealer, playerList);
+            Print.printUltimateResult(users);
+            new Result().setUltimateProfitAtRoundOne(users);
         } else {
-            playAfterRoundOne(dealer, playerList);
+            playAfterRoundOne(users);
         }
     }
 
-    public void continuePlayingOrNotAfterRoundOne(Dealer dealer, List<Player> playerList) {
-        boolean isUnderTwenty = playerList.stream()
-                .anyMatch(player -> Blackjack.isUnderTwenty(new Deck(player.getCards())));
+    public void continuePlayingOrNotAfterRoundOne(List<User> users) {
+        boolean isUnderTwenty = users.stream()
+                .anyMatch(user -> Blackjack.isUnderTwenty(new Deck(user.getCards())));
         if (isUnderTwenty) {
-            playAfterRoundOne(dealer, playerList);
+            playAfterRoundOne(users);
         } else {
-            Print.printUltimateResult(dealer, playerList);
-            new Result().setUltimateProfitAfterRoundOne(dealer, playerList);
+            Print.printUltimateResult(users);
+            new Result().setUltimateProfitAfterRoundOne(users);
         }
     }
 

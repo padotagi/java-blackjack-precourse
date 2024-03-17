@@ -3,6 +3,7 @@ package domain.card;
 import domain.Print;
 import domain.user.Dealer;
 import domain.user.Player;
+import domain.user.User;
 import org.junit.jupiter.api.Test;
 
 import java.io.PrintStream;
@@ -17,17 +18,18 @@ class RoundTest {
     @Test
     void playRoundOne() {
         //given
-        Dealer dealer = new Dealer();
+        Dealer dealer = new Dealer("", 0);
         dealer.addCard(new Card(Symbol.ACE, Type.CLUB));
         dealer.addCard(new Card(Symbol.ACE, Type.CLUB));
-        List<Player> playerList = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         Player player = new Player("sayo", 3000);
         player.addCard(new Card(Symbol.ACE, Type.CLUB));
         player.addCard(new Card(Symbol.ACE, Type.HEART));
-        playerList.add(player);
+        users.add(dealer);
+        users.add(player);
         //when
-        Print.printOneRoundInfo(dealer, playerList);
-        new Round().continuePlayingOrNotAtRoundOne(dealer, playerList);
+        Print.printOneRoundInfo(users);
+        new Round().continuePlayingOrNotAtRoundOne(users);
         //then
         PrintStream mockPrintStream = mock(PrintStream.class);
         verify(mockPrintStream).println(player.getName() + Print.ASK_GIVE_ONE_MORE_CARD);
@@ -36,22 +38,25 @@ class RoundTest {
     @Test
     void playAfterRoundOne() {
         //given
-        Dealer dealer = new Dealer();
+        Dealer dealer = new Dealer("", 0);
         dealer.addCard(new Card(Symbol.ACE, Type.CLUB));
         dealer.addCard(new Card(Symbol.ACE, Type.CLUB));
-        List<Player> playerList = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         Player player = new Player("sayo", 3000);
         player.addCard(new Card(Symbol.ACE, Type.CLUB));
         player.addCard(new Card(Symbol.ACE, Type.HEART));
-        playerList.add(player);
+        users.add(dealer);
+        users.add(player);
         //when
         Round round = new Round();
-        playerList.forEach(round::dealOneCard);
+        users.stream()
+                .filter(user -> !(user instanceof Dealer))
+                .forEach(user -> round.dealOneCard((Player) user));
         if (Blackjack.isUnderSixteen(new Deck(dealer.getCards()))) {
             System.out.println(Print.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
             dealer.addCard(Card.getCard());
         }
-        round.continuePlayingOrNotAfterRoundOne(dealer, playerList);
+        round.continuePlayingOrNotAfterRoundOne(users);
         //then
         PrintStream mockPrintStream = mock(PrintStream.class);
         verify(mockPrintStream).println(player.getName() + Print.ASK_GIVE_ONE_MORE_CARD);
