@@ -1,5 +1,6 @@
 package domain.card;
 
+import domain.Input;
 import domain.Print;
 import domain.user.Dealer;
 import domain.user.Player;
@@ -32,7 +33,7 @@ class RoundTest {
         new Round().continuePlayingOrNotAtRoundOne(users);
         //then
         PrintStream mockPrintStream = mock(PrintStream.class);
-        verify(mockPrintStream).println(player.getName() + Print.ASK_GIVE_ONE_MORE_CARD);
+        verify(mockPrintStream).println(player.getName() + Input.ASK_GIVE_ONE_MORE_CARD);
     }
 
     @Test
@@ -53,22 +54,13 @@ class RoundTest {
                 .filter(user -> !(user instanceof Dealer))
                 .forEach(user -> round.dealOneCard((Player) user));
         if (Blackjack.isUnderSixteen(new Deck(dealer.getCards()))) {
-            System.out.println(Print.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
+            System.out.println(Round.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
             dealer.addCard(Card.getCard());
         }
         round.continuePlayingOrNotAfterRoundOne(users);
         //then
         PrintStream mockPrintStream = mock(PrintStream.class);
-        verify(mockPrintStream).println(player.getName() + Print.ASK_GIVE_ONE_MORE_CARD);
-    }
-
-    @Test
-    void continuePlayingOrNotAtRoundOne() {
-
-        //when
-
-        //then
-
+        verify(mockPrintStream).println(player.getName() + Input.ASK_GIVE_ONE_MORE_CARD);
     }
 
     @Test

@@ -5,66 +5,68 @@ import domain.card.Deck;
 import domain.user.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Result {
 
-    List<Winner> winners = new ArrayList<>();
-    List<Loser> losers = new ArrayList<>();
+    public static final double BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND = 1.5;
 
     public void setUltimateProfitAtRoundOne(List<User> users) {
-        getWinnerAndLosers(users);
+        Map<String, List<Player>> resultMap = getWinnerAndLosers(users);
+        List<Player> winners = resultMap.get("winners");
+        List<Player> losers = resultMap.get("losers");
         if (Blackjack.isBlackjack(new Deck(users.get(0).getCards()))) {
             if (winners.size() == 0) {
-                users.get(0).setPrize(getSumOfBettingMoney(losers.stream()
-                        .map(loser -> (Player) loser)
-                        .collect(Collectors.toList())));
+                users.get(0).setPrize(getSumOfBettingMoney(losers));
             }
         } else {
-            winners.forEach(winner -> winner.setPrize(winner.getBettingMoney() * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND));
-            users.get(0).setPrize(Math.negateExact((int) (getSumOfBettingMoney(winners.stream()
-                    .map(winner -> (Player) winner)
-                    .collect(Collectors.toList())
-            ) * Print.BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND)));
+            winners.forEach(winner -> winner.setPrize(winner.getBettingMoney() * BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND));
+            users.get(0).setPrize(Math.negateExact((int) (getSumOfBettingMoney(winners) * BLACKJACK_PLAYER_PROFIT_FOR_ONE_ROUND)));
         }
         Print.printUltimateProfitInfo(users);
     }
 
     public void setUltimateProfitAfterRoundOne(List<User> users) {
-        getWinnerAndLosers(users);
-        double loserBettingMoney = getSumOfBettingMoney(losers.stream()
-                .map(loser -> (Player) loser)
-                .collect(Collectors.toList()));
+        Map<String, List<Player>> resultMap = getWinnerAndLosers(users);
+        List<Player> winners = resultMap.get("winners");
+        List<Player> losers = resultMap.get("losers");
+        double loserBettingMoney = getSumOfBettingMoney(losers);
         double dividedLoserBettingMoney = winners.size() > 0 ? loserBettingMoney / winners.size() : loserBettingMoney;
         if (Blackjack.isBlackjack(new Deck(users.get(0).getCards()))) {
             if (winners.size() == 0) {
                 users.get(0).setPrize(loserBettingMoney);
             } else {
-                copyPrize(users, dividedLoserBettingMoney);
+                copyPrize(users, dividedLoserBettingMoney, resultMap);
             }
         } else {
-            copyPrize(users, dividedLoserBettingMoney);
-            users.get(0).setPrize(Math.negateExact((int) getSumOfBettingMoney(winners.stream()
-                    .map(winner -> (Player) winner)
-                    .collect(Collectors.toList()))));
+            copyPrize(users, dividedLoserBettingMoney, resultMap);
+            users.get(0).setPrize(Math.negateExact((int) getSumOfBettingMoney(winners)));
         }
         Print.printUltimateProfitInfo(users);
     }
 
-    public void getWinnerAndLosers(List<User> users) {
+    public Map<String, List<Player>> getWinnerAndLosers(List<User> users) {
+        Map<String, List<Player>> playerResult = new HashMap<>();
+        List<Player> winners = new ArrayList<>();
+        List<Player> losers = new ArrayList<>();
+
         List<Player> players = users.stream()
                 .filter(user -> !(user instanceof Dealer))
                 .map(user -> (Player) user)
                 .collect(Collectors.toList());
-
         for (Player player : players) {
             if (Blackjack.isBlackjack(new Deck(player.getCards()))) {
-                winners.add((Winner) player);
+                winners.add(player);
             } else {
-                losers.add((Loser) player);
+                losers.add(player);
             }
         }
+        playerResult.put("winners", winners);
+        playerResult.put("losers", losers);
+        return playerResult;
     }
 
     public double getSumOfBettingMoney(List<Player> players) {
@@ -72,16 +74,17 @@ public class Result {
                 .mapToDouble(Player::getBettingMoney).sum();
     }
 
-    public void copyPrize(List<User> users, double prize) {
-        for (Winner winner : winners) {
+    public List<User> copyPrize(List<User> users, double prize, Map<String, List<Player>> playerResult) {
+        for (Player winner : playerResult.get("winners")) {
             users.stream()
                     .filter(user -> user.getName().equals(winner.getName()))
                     .forEach(user -> user.setPrize(prize));
         }
-        for (Loser loser : losers) {
+        for (Player loser : playerResult.get("losers")) {
             users.stream()
                     .filter(user -> user.getName().equals(loser.getName()))
                     .forEach(user -> user.setPrize(Math.negateExact((int) prize)));
         }
+        return users;
     }
 }

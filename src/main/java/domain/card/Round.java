@@ -3,13 +3,14 @@ package domain.card;
 import domain.Result;
 import domain.Print;
 import domain.Input;
-import domain.user.Dealer;
 import domain.user.Player;
 import domain.user.User;
 
 import java.util.List;
 
 public class Round {
+
+    public static final String DEALER_GOT_ONE_MORE_CARD_BY_SCORE = "딜러는 16이하라 한장의 카드를 더 받았습니다.";
 
     public void playRoundOne(List<User> users) {
         Print.printOneRoundInfo(users);
@@ -18,11 +19,11 @@ public class Round {
 
     public void playAfterRoundOne(List<User> users) {
         users.stream()
-                .filter(user -> !(user instanceof Dealer))
+                .filter(user -> !user.getName().equals(Print.DEALER))
                 .forEach(user -> dealOneCard((Player) user));
 
         if (Blackjack.isUnderSixteen(new Deck(users.get(0).getCards()))) {
-            System.out.println(Print.DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
+            System.out.println(DEALER_GOT_ONE_MORE_CARD_BY_SCORE);
             users.get(0).addCard(Card.getCard());
         }
         continuePlayingOrNotAfterRoundOne(users);
@@ -41,7 +42,9 @@ public class Round {
 
     public void continuePlayingOrNotAfterRoundOne(List<User> users) {
         boolean isUnderTwenty = users.stream()
+                .filter(user -> !user.getName().equals(Print.DEALER))
                 .anyMatch(user -> Blackjack.isUnderTwenty(new Deck(user.getCards())));
+
         if (isUnderTwenty) {
             playAfterRoundOne(users);
         } else {
